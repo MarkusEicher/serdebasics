@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{Error, to_string_pretty, from_str};
+use std::fs;
+use std::path::Path;
 
 // Building the data structures
 #[derive(Serialize, Deserialize, Debug)]
@@ -17,12 +19,13 @@ struct KGDomain {
     kgdescription: String,
 }
 
-// Serializing (needs to be refactored to a pure main function)
+// Main function
 fn main() {
     serialize_bookmarks();
     deserialize_bookmarks();
 }
 
+// Serializing here
 fn serialize_bookmarks() {
     let kgdomain1 = KGDomain {
         kgtype: "Technology".to_string(),
@@ -41,8 +44,25 @@ fn serialize_bookmarks() {
     }
 }
 
-// Deserializing
+// Deserializing here
+
+// Read in json file from /assets
+fn deserialize_bookmark_from_file<P: AsRef<Path>>(path: P) -> Result<Bookmark, serde_json::Error> {
+    let json_content = fs::read_to_string(path).expect("Datei konnte nicht gelesen werden");
+    let bookmark: Bookmark = from_str(&json_content)?;
+    Ok(bookmark)
+}
+
+// Deserialize the file content
 fn deserialize_bookmarks() {
+    match deserialize_bookmark_from_file("assets/bookmarks.json") {
+        Ok(bookmark) => println!("{:#?}", bookmark),
+        Err(e) => eprintln!("Fehler beim Deserialisieren: {}", e),
+    }
+}
+
+
+/* fn deserialize_bookmarks() {
     let json_string: &str = r#"
     {
         "TITLE": "Rust Project Page",
@@ -60,4 +80,5 @@ fn deserialize_bookmarks() {
     } else {
         println!("{:#?}", bookmark_deserialize.err());
     }
-}
+
+} */
